@@ -1,13 +1,12 @@
 library(tidyverse)
 library(fs)
 
-setwd("~/data")
+
 
 df <- read_csv("category_138.csv") |> 
   rename_with(\(x) str_remove(x, "participant."))
 meta_qc <- read_csv("qc_metadata.csv") |> 
   rename_with(\(x) str_remove(x, "participant."))
-
 
 xx <- dir_ls(glob = "*f20002*") |> 
   map(\(x) {
