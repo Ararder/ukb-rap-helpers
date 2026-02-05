@@ -8,17 +8,27 @@ set -euo pipefail
 
 OUTDIR="/home/rstudio-server"
 OUT_PREFIX="test_pgs"
-PLINK2="/home/rstudio-server/plink2"
+SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+PLINK2="${SCRIPT_DIR}/software/plink2"
 BGEN_DIR="/mnt/project/Bulk/Imputation/UKB imputation from genotype"
 BGEN_PATH="${BGEN_DIR}/ukb22828_c21_b0_v3"
 SCORE_FILE="${OUTDIR}/test_score_chr21.tsv"
+PLINK2_URL="https://s3.amazonaws.com/plink2-assets/plink2_linux_avx2_20260110.zip"
 
 # --- Validation ---
 
 if [ ! -x "$PLINK2" ]; then
-    echo "Error: plink2 not found at $PLINK2"
-    echo "Download it with: sh/download_plink2.sh"
-    exit 1
+    echo "plink2 not found, installing to ${SCRIPT_DIR}/software/ ..."
+    mkdir -p "${SCRIPT_DIR}/software"
+    wget -q "$PLINK2_URL" -O /tmp/plink2.zip
+    unzip -o /tmp/plink2.zip -d "${SCRIPT_DIR}/software"
+    rm /tmp/plink2.zip
+    chmod +x "$PLINK2"
+    if [ ! -x "$PLINK2" ]; then
+        echo "Error: plink2 installation failed"
+        exit 1
+    fi
+    echo "plink2 installed successfully"
 fi
 
 if [ ! -f "${BGEN_PATH}.bgen" ]; then

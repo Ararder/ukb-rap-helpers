@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tree:*)",
+      "WebSearch",
+      "WebFetch(domain:dnanexus.gitbook.io)",
+      "WebFetch(domain:www.cog-genomics.org)",
+      "Bash(bash -n:*)",
+      "Bash(chmod:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nAdd polygenic score pipeline and chr21 test script\n\npgs.sh runs plink2 --score across chromosomes 1-22 and aggregates\nper-individual scores. test_pgs.sh validates the pipeline on chr21\nwith a dummy score file.\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git push:*)",
+      "Bash(git -C /Users/arvid.harder/projects/ukb-rap-helpers status)",
+      "Bash(git -C /Users/arvid.harder/projects/ukb-rap-helpers diff)",
+      "Bash(git -C /Users/arvid.harder/projects/ukb-rap-helpers log --oneline -5)"
+    ]
+  }
+}

@@ -13,8 +13,10 @@ fi
 SCORE_FILE="$1"
 OUT_PREFIX="${2:-pgs}"
 OUTDIR="/home/rstudio-server"
-PLINK2="/home/rstudio-server/plink2"
+SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+PLINK2="${SCRIPT_DIR}/software/plink2"
 BGEN_DIR="/mnt/project/Bulk/Imputation/UKB imputation from genotype"
+PLINK2_URL="https://s3.amazonaws.com/plink2-assets/plink2_linux_avx2_20260110.zip"
 
 # --- Validation ---
 
@@ -24,9 +26,17 @@ if [ ! -f "$SCORE_FILE" ]; then
 fi
 
 if [ ! -x "$PLINK2" ]; then
-    echo "Error: plink2 not found or not executable at $PLINK2"
-    echo "Download it with: sh/download_plink2.sh"
-    exit 1
+    echo "plink2 not found, installing to ${SCRIPT_DIR}/software/ ..."
+    mkdir -p "${SCRIPT_DIR}/software"
+    wget -q "$PLINK2_URL" -O /tmp/plink2.zip
+    unzip -o /tmp/plink2.zip -d "${SCRIPT_DIR}/software"
+    rm /tmp/plink2.zip
+    chmod +x "$PLINK2"
+    if [ ! -x "$PLINK2" ]; then
+        echo "Error: plink2 installation failed"
+        exit 1
+    fi
+    echo "plink2 installed successfully"
 fi
 
 if [ ! -f "${BGEN_DIR}/ukb22828_c22_b0_v3.bgen" ]; then
