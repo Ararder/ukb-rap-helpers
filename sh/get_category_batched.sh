@@ -70,7 +70,8 @@ if [ $((BATCH - 1)) -gt 1 ]; then
         fi
     done
     echo "Merged file: /home/rstudio-server/category_$1.csv"
-    
-    # Uncomment to remove batch files after merge:
-    # rm $BATCH_FILES
+    rm $BATCH_FILES
+else
+    mv "$BATCH_FILES" "/home/rstudio-server/category_$1.csv"
+    echo "Single batch: /home/rstudio-server/category_$1.csv"
 fi
