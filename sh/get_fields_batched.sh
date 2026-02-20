@@ -84,4 +84,4 @@ done
 echo "Extracted to: $MERGED"
 
 # Uncomment to remove batch files after merge:
-# rm $BATCH_FILES
+rm $BATCH_FILES

@@ -7,7 +7,11 @@ fi
 
 BATCH_SIZE=${2:-50}  # Optional second argument, default 50 fields per batch
 
-Rscript get_data.R "$1"
+FIELD_IDS=$(Rscript -e "
+  suppressMessages(library(tidyverse))
+  fields <- read_tsv('$(dirname "$0")/field.txt', show_col_types = FALSE)
+  filter(fields, main_category == $1) |> pull(field_id) |> cat(sep = '\n')
+")
 
 DATASET=$(dx find data --name "app*.dataset" --brief | head -n 1)
 
@@ -16,14 +20,12 @@ if [ -z "$DATASET" ]; then
     exit 1
 fi
 
-dx extract_dataset "$DATASET" --list-fields | awk '{print $1}' > available_fields.txt
+AVAILABLE=$(dx extract_dataset "$DATASET" --list-fields | awk '{print $1}')
 
 # Match field IDs to available fields (with instances)
-FIELDS=$(while read -r fid; do
-    grep "participant\.p${fid}_" available_fields.txt || grep "^participant\.p${fid}$" available_fields.txt
-done < selected_fields.txt | sort -u)
-
-rm available_fields.txt
+FIELDS=$(echo "$FIELD_IDS" | while read -r fid; do
+    echo "$AVAILABLE" | grep -E "participant\.p${fid}_|^participant\.p${fid}$"
+done | sort -u)
 
 if [ -z "$FIELDS" ]; then
     echo "Error: No matching fields found for category $1"
