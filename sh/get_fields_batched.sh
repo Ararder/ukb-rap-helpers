@@ -70,16 +70,14 @@ echo "Extraction complete: $((BATCH - 1)) batches"
 # Join batches on participant.eid — avoids row-order assumptions from paste
 MERGED="/home/rstudio-server/$OUTPUT_NAME"
 
-python3 - <<PYEOF "$MERGED" $BATCH_FILES
-import sys, pandas as pd
-out, *files = sys.argv[1:]
-dfs = [pd.read_csv(f) for f in files]
-merged = dfs[0]
-for df in dfs[1:]:
-    merged = merged.merge(df, on="participant.eid", how="inner")
-merged.to_csv(out, index=False)
-print(f"Extracted to: {out}")
-PYEOF
+Rscript - "$MERGED" $BATCH_FILES <<'REOF'
+args  <- commandArgs(trailingOnly = TRUE)
+out   <- args[1]
+files <- args[-1]
+merged <- Reduce(\(a, b) merge(a, b, by = "participant.eid", all = FALSE), lapply(files, read.csv))
+write.csv(merged, out, row.names = FALSE)
+cat("Extracted to:", out, "\n")
+REOF
 
 # Uncomment to remove batch files after merge:
 rm $BATCH_FILES
