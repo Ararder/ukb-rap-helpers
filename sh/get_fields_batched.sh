@@ -67,21 +67,19 @@ done
 
 echo "Extraction complete: $((BATCH - 1)) batches"
 
-# Column-bind batches into single file
+# Join batches on participant.eid — avoids row-order assumptions from paste
 MERGED="/home/rstudio-server/$OUTPUT_NAME"
 
-FIRST=true
-for bf in $BATCH_FILES; do
-    if $FIRST; then
-        cp "$bf" "$MERGED"
-        FIRST=false
-    else
-        paste -d, "$MERGED" <(cut -d, -f2- "$bf") > /tmp/fields_merged.csv
-        mv /tmp/fields_merged.csv "$MERGED"
-    fi
-done
-
-echo "Extracted to: $MERGED"
+python3 - <<PYEOF "$MERGED" $BATCH_FILES
+import sys, pandas as pd
+out, *files = sys.argv[1:]
+dfs = [pd.read_csv(f) for f in files]
+merged = dfs[0]
+for df in dfs[1:]:
+    merged = merged.merge(df, on="participant.eid", how="inner")
+merged.to_csv(out, index=False)
+print(f"Extracted to: {out}")
+PYEOF
 
 # Uncomment to remove batch files after merge:
 rm $BATCH_FILES
